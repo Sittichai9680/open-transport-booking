@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Booking confirmed · BEF</title>
+  <link rel="stylesheet" href="../css/system.css" />
+  <style>
+    .qr-placeholder {
+      width: 180px; height: 180px;
+      margin: 0 auto var(--gap-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: grid; place-items: center;
+    }
+    .qr-placeholder-inner {
+      text-align: center;
+    }
+    .qr-placeholder-inner .qr-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .qr-placeholder-inner .qr-code-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: var(--gap-sm);
+      word-break: break-all;
+    }
+    .confirm-details {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--gap-sm) 0;
+      font-size: 13px;
+    }
+    .detail-row + .detail-row { border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-l">
+        <a href="../index.html" class="logo"><span class="logo-accent">&lt;</span>BEF<span class="logo-accent">/&gt;</span></a>
+      </div>
+      <nav>
+        <a href="../index.html">Overview</a>
+        <a href="01-search.html">Search</a>
+        <a href="05-dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section" data-od-id="confirmation">
+      <div class="container" style="max-width:560px">
+        <div class="confirm-hero">
+          <div class="confirm-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="4 13 9 18 20 6" />
+            </svg>
+          </div>
+          <p class="label-sm" style="color:var(--accent);margin-bottom:var(--gap-sm);letter-spacing:0.08em">Booking Confirmed</p>
+          <h1>Your trip is booked.</h1>
+          <div class="confirm-code" id="bookingCodeDisplay">BEF-XXXX-XX</div>
+          <p class="lead" style="margin:0 auto">Mock booking confirmation. This data is stored in your browser (localStorage) — not on a server.</p>
+        </div>
+
+        <div class="qr-placeholder" aria-label="QR code placeholder for booking">
+          <div class="qr-placeholder-inner">
+            <span class="qr-label">QR Code</span>
+            <div class="qr-code-text" id="qrCodeText">BEF-XXXX-XX</div>
+            <span style="display:block;font-size:10px;color:var(--muted);margin-top:var(--gap-xs)">QR placeholder — server-side QR generation not implemented</span>
+          </div>
+        </div>
+
+        <div class="confirm-details" id="bookingDetails">
+          <div class="detail-row">
+            <span class="meta">Booking code</span>
+            <span class="mono" id="detailCode" style="font-weight:600">BEF-XXXX-XX</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Status</span>
+            <span class="pill pill-green" id="detailStatus" style="font-size:11px">Event: BookingConfirmed</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Passenger</span>
+            <span id="detailPassenger">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Route</span>
+            <span id="detailRoute">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Departure</span>
+            <span id="detailDeparture">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Seat</span>
+            <span class="mono" id="detailSeat">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Phone</span>
+            <span id="detailPhone">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="meta">Amount paid</span>
+            <span class="mono" id="detailAmount" style="color:var(--accent);font-weight:600">฿ 0</span>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:center;margin-top:var(--gap-xl);gap:var(--gap-md)">
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">Print ticket</button>
+          <a href="01-search.html" class="btn btn-ghost btn-sm">New search</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="event-log" style="padding-top:0">
+      <div class="container" style="max-width:560px">
+        <p class="label-sm" style="margin-bottom:var(--gap-md)">Simulated Event Log</p>
+        <div class="card card-compact" id="eventLogContainer">
+          <div class="stack" style="gap:var(--gap-sm)">
+            <div class="row-between">
+              <span class="mono" style="font-size:12px;color:var(--accent)">SeatReserved</span>
+              <span class="meta" id="eventTime1">—</span>
+            </div>
+            <div class="row-between">
+              <span class="mono" style="font-size:12px;color:var(--accent)">BookingCreated</span>
+              <span class="meta" id="eventTime2">—</span>
+            </div>
+            <div class="row-between">
+              <span class="mono" style="font-size:12px;color:var(--accent)">BookingConfirmed</span>
+              <span class="meta" id="eventTime3">—</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:10px;color:var(--muted);margin-top:var(--gap-sm);text-align:center">Client-side simulation — not an actual event store projection</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>&lt;BEF/&gt; · Booking Engine Framework</span>
+      <span class="meta">Reference UI · Mock Data</span>
+    </div>
+  </footer>
+
+  <script>
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function getTimeStr() {
+      const d = new Date();
+      return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    function loadBooking() {
+      const params = new URLSearchParams(window.location.search);
+      const bookingId = params.get('id');
+
+      const bookings = JSON.parse(localStorage.getItem('bef_bookings') || '[]');
+      let booking = bookings.find(b => b.id === bookingId);
+
+      if (!booking && bookings.length > 0) booking = bookings[bookings.length - 1];
+      if (!booking) {
+        document.getElementById('detailPassenger').textContent = 'No booking found';
+        return;
+      }
+
+      const code = booking.bookingCode;
+      document.getElementById('bookingCodeDisplay').textContent = code;
+      document.getElementById('qrCodeText').textContent = code;
+      document.getElementById('detailCode').textContent = code;
+      document.getElementById('detailStatus').textContent = 'Confirmed';
+      document.getElementById('detailPassenger').textContent = booking.passenger;
+      document.getElementById('detailRoute').textContent = booking.route;
+      document.getElementById('detailDeparture').textContent = booking.departure;
+      document.getElementById('detailSeat').textContent = booking.seat;
+      document.getElementById('detailPhone').textContent = booking.phone;
+      document.getElementById('detailAmount').textContent = '฿ ' + booking.amount.toLocaleString();
+
+      const now = getTimeStr();
+      document.getElementById('eventTime1').textContent = now;
+      document.getElementById('eventTime2').textContent = now;
+      document.getElementById('eventTime3').textContent = now;
+    }
+
+    loadBooking();
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"~/.claude/skills/gstack/bin/gstack-learnings-log '{\\\"skill\\\":\\\"office-hours\\\",\\\"type\\\":\\\"pattern\\\",\\\"key\\\":\\\"thai-agency-npm-wedge\\\",\\\"insight\\\":\\\"Thai dev agencies rebuild booking systems...",
+  "error": "Exit code 1\n(eval):1: unmatched \"",
+  "timestamp": "2026-06-05T06:16:08.014Z",
+  "retry_count": 4
+}

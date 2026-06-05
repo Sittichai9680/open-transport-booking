@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout · BEF</title>
+  <link rel="stylesheet" href="../css/system.css" />
+  <style>
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: var(--gap-xl);
+      align-items: start;
+    }
+    .summary-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--gap-lg);
+    }
+    .field-error {
+      font-size: 11px;
+      color: var(--danger);
+      margin-top: 2px;
+      display: none;
+    }
+    .input-error {
+      border-color: var(--danger) !important;
+    }
+    @media (max-width: 920px) {
+      .checkout-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-l">
+        <a href="../index.html" class="logo"><span class="logo-accent">&lt;</span>BEF<span class="logo-accent">/&gt;</span></a>
+      </div>
+      <nav>
+        <a href="../index.html">Overview</a>
+        <a href="01-search.html">Search</a>
+        <a href="05-dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section" data-od-id="checkout">
+      <div class="container">
+        <p class="label-sm" style="margin-bottom:var(--gap-sm)">Step 3 of 4</p>
+        <h2 style="margin-bottom:var(--gap-xl)">Passenger details</h2>
+
+        <div class="checkout-grid">
+          <div>
+            <form id="checkoutForm" novalidate>
+              <div class="grid-2" style="margin-bottom:var(--gap-lg)">
+                <div class="field">
+                  <label for="firstName">First name <span style="color:var(--danger)">*</span></label>
+                  <input class="input" id="firstName" type="text" placeholder="e.g. สมชาย" required />
+                  <div class="field-error" id="firstNameError">First name is required</div>
+                </div>
+                <div class="field">
+                  <label for="lastName">Last name <span style="color:var(--danger)">*</span></label>
+                  <input class="input" id="lastName" type="text" placeholder="e.g. ใจดี" required />
+                  <div class="field-error" id="lastNameError">Last name is required</div>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:var(--gap-md)">
+                <label for="phone">Phone number <span style="color:var(--danger)">*</span></label>
+                <input class="input" id="phone" type="tel" placeholder="e.g. 081-234-5678" required />
+                <div class="field-error" id="phoneError">Phone number is required</div>
+              </div>
+              <div class="field" style="margin-bottom:var(--gap-md)">
+                <label for="email">Email <span style="color:var(--danger)">*</span></label>
+                <input class="input" id="email" type="email" placeholder="e.g. somchai@example.com" required />
+                <div class="field-error" id="emailError">Valid email is required</div>
+              </div>
+              <div class="field" style="margin-bottom:var(--gap-lg)">
+                <label for="idCard">ID card / Passport</label>
+                <input class="input" id="idCard" type="text" placeholder="13-digit Thai ID or passport number" />
+              </div>
+
+              <div class="card" style="margin-bottom:var(--gap-lg)">
+                <div class="card-header" style="margin-bottom:var(--gap-md)">
+                  <span class="card-title">Add-ons</span>
+                </div>
+                <div class="stack" style="gap:var(--gap-md)">
+                  <label class="row" style="cursor:pointer;gap:var(--gap-sm)">
+                    <input type="checkbox" id="addonInsurance" checked />
+                    <span>
+                      <strong style="font-size:13px">Seat insurance</strong>
+                      <span style="display:block;font-size:12px;color:var(--muted)">฿ 20 &middot; Cancellation protection</span>
+                    </span>
+                  </label>
+                  <label class="row" style="cursor:pointer;gap:var(--gap-sm)">
+                    <input type="checkbox" id="addonSms" />
+                    <span>
+                      <strong style="font-size:13px">SMS notification</strong>
+                      <span style="display:block;font-size:12px;color:var(--muted)">฿ 5 &middot; Departure reminders</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" style="text-align:center">Confirm booking</button>
+            </form>
+          </div>
+
+          <div class="summary-sidebar">
+            <div class="card-header">
+              <span class="card-title">Booking summary</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Route</span>
+              <span class="summary-value" id="summaryRoute">BKK &rarr; CNX</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Departure</span>
+              <span class="summary-value" id="summaryDeparture">15 Jun 2026, 06:00</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Seat</span>
+              <span class="summary-value mono" id="summarySeat">A1</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Vehicle</span>
+              <span class="summary-value" id="summaryVehicle">VIP-32 &middot; Green Bus</span>
+            </div>
+            <hr />
+            <div class="summary-row">
+              <span class="summary-label">Ticket</span>
+              <span class="summary-value mono" id="summaryTicket">฿ 780</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Seat insurance</span>
+              <span class="summary-value mono" id="summaryInsurance">฿ 20</span>
+            </div>
+            <div class="summary-row" style="font-weight:600;border-top:2px solid var(--fg);margin-top:var(--gap-sm);padding-top:var(--gap-md)">
+              <span class="summary-label" style="color:var(--fg)">Total</span>
+              <span class="summary-value mono" id="summaryTotal" style="color:var(--accent);font-size:18px">฿ 800</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>&lt;BEF/&gt; · Booking Engine Framework</span>
+      <span class="meta">Reference UI · Mock Data</span>
+    </div>
+  </footer>
+
+  <script>
+    let trips = [];
+    let tripData = null;
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const tripId = params.get('trip') || 'trip-001';
+      const seat = params.get('seat') || 'A1';
+
+      try {
+        const res = await fetch('../data/trips.json');
+        trips = await res.json();
+        tripData = trips.find(t => t.id === tripId) || trips[0];
+      } catch (e) { tripData = null; }
+
+      document.getElementById('summarySeat').textContent = seat;
+      if (tripData) {
+        document.getElementById('summaryRoute').textContent = tripData.route;
+        const d = tripData.date + ' ' + tripData.departure;
+        document.getElementById('summaryDeparture').textContent = d;
+        document.getElementById('summaryVehicle').textContent = tripData.vehicle + ' &middot; ' + tripData.operator.split(' ')[0];
+        document.getElementById('summaryTicket').textContent = '฿ ' + tripData.price.toLocaleString();
+        updateTotal();
+      }
+    }
+
+    function updateTotal() {
+      const price = tripData ? tripData.price : 780;
+      const insurance = document.getElementById('addonInsurance').checked ? 20 : 0;
+      const sms = document.getElementById('addonSms').checked ? 5 : 0;
+      const total = price + insurance + sms;
+      document.getElementById('summaryInsurance').textContent = '฿ ' + (insurance + sms);
+      document.getElementById('summaryTotal').textContent = '฿ ' + total.toLocaleString();
+    }
+
+    document.getElementById('addonInsurance').addEventListener('change', updateTotal);
+    document.getElementById('addonSms').addEventListener('change', updateTotal);
+
+    function generateBookingCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let p1 = '', p2 = '';
+      for (let i = 0; i < 4; i++) p1 += chars[Math.floor(Math.random() * chars.length)];
+      for (let i = 0; i < 2; i++) p2 += chars[Math.floor(Math.random() * chars.length)];
+      return 'BEF-' + p1 + '-' + p2;
+    }
+
+    function showError(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function hideAllErrors() {
+      document.querySelectorAll('.field-error').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      hideAllErrors();
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      let valid = true;
+
+      if (!firstName) { showError('firstNameError'); document.getElementById('firstName').classList.add('input-error'); valid = false; }
+      if (!lastName) { showError('lastNameError'); document.getElementById('lastName').classList.add('input-error'); valid = false; }
+      if (!phone) { showError('phoneError'); document.getElementById('phone').classList.add('input-error'); valid = false; }
+      if (!email || !email.includes('@')) { showError('emailError'); document.getElementById('email').classList.add('input-error'); valid = false; }
+
+      if (!valid) return;
+
+      const bookingCode = generateBookingCode();
+      const params = new URLSearchParams(window.location.search);
+      const tripId = params.get('trip') || 'trip-001';
+      const seat = params.get('seat') || 'A1';
+
+      const booking = {
+        id: 'book-' + Date.now(),
+        bookingCode: bookingCode,
+        passenger: firstName + ' ' + lastName,
+        phone: phone,
+        email: email,
+        tripId: tripId,
+        route: tripData ? tripData.route : 'BKK → CNX',
+        departure: tripData ? tripData.date + ' ' + tripData.departure : '2026-06-15 06:00',
+        seat: seat,
+        amount: tripData ? tripData.price : 780,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        events: ['SeatReserved', 'BookingCreated', 'BookingConfirmed']
+      };
+
+      const existing = JSON.parse(localStorage.getItem('bef_bookings') || '[]');
+      existing.push(booking);
+      localStorage.setItem('bef_bookings', JSON.stringify(existing));
+
+      window.location.href = '04-confirmation.html?id=' + booking.id;
+    });
+
+    init();
+  </script>
+</body>
+</html>

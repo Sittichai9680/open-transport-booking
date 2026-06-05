@@ -1,0 +1,7 @@
+[
+  { "type": "BookingConfirmed", "detail": "BEF-8A3F-2C — สมชาย ใจดี", "ts": "14:23" },
+  { "type": "BookingCreated", "detail": "BEF-9C4G-3E — ก้อง ไกรวิชญ์", "ts": "14:21" },
+  { "type": "BookingCancelled", "detail": "BEF-6A1D-0B — สุภาพร มั่นคง", "ts": "13:45" },
+  { "type": "SeatLockExpired", "detail": "trip-003, seat J2", "ts": "13:30" },
+  { "type": "SeatReserved", "detail": "trip-002, seat D1", "ts": "12:58" }
+]

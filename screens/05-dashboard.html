@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operator dashboard · BEF</title>
+  <link rel="stylesheet" href="../css/system.css" />
+  <style>
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--gap-md);
+      margin-bottom: var(--gap-xl);
+    }
+    .dash-chart-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--gap-lg);
+      margin-bottom: var(--gap-xl);
+    }
+    .dash-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--gap-lg);
+    }
+    .dash-tab {
+      padding: 10px 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.12s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .dash-tab:hover,
+    .dash-tab:focus-visible { color: var(--fg); }
+    .dash-tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+
+    .chart-bar {
+      width: 100%;
+      border-radius: 3px;
+      transition: height 0.3s;
+    }
+
+    @media (max-width: 920px) {
+      .dash-grid { grid-template-columns: repeat(2, 1fr); }
+      .dash-chart-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-l">
+        <a href="../index.html" class="logo"><span class="logo-accent">&lt;</span>BEF<span class="logo-accent">/&gt;</span></a>
+        <span class="pill pill-green">Operator</span>
+      </div>
+      <nav>
+        <a href="../index.html">Overview</a>
+        <a href="01-search.html">Search</a>
+        <a href="05-dashboard.html" class="active">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section" data-od-id="dashboard">
+      <div class="container">
+        <div class="row-between" style="margin-bottom:var(--gap-xl)">
+          <div>
+            <h2>Operator dashboard</h2>
+            <p class="meta" style="margin-top:2px">Data loaded from mock JSON + localStorage</p>
+          </div>
+          <div class="row">
+            <span class="honest-badge" style="display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:10px;color:var(--muted);padding:3px 8px;border:1px dashed var(--border);border-radius:999px">Static demo — client-side aggregation only</span>
+            <button class="btn btn-secondary btn-sm" id="exportBtn">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="dash-grid" id="kpiGrid">
+          <div class="dash-stat">
+            <div class="dash-stat-header">
+              <span class="dash-stat-label">Total bookings</span>
+              <span class="pill pill-green" id="kpiPercent1">+12%</span>
+            </div>
+            <div class="dash-stat-value mono" style="color:var(--accent)" id="kpiBookings">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:var(--gap-xs)"><span class="mono" id="kpiBreakdown">0</span> total · data from mock + client</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-header">
+              <span class="dash-stat-label">Revenue</span>
+              <span class="pill pill-green" id="kpiPercent2">+8.3%</span>
+            </div>
+            <div class="dash-stat-value mono" style="color:var(--accent)" id="kpiRevenue">฿ 0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:var(--gap-xs)">Computed from booking data</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-header">
+              <span class="dash-stat-label">Seat occupancy</span>
+              <span class="pill pill-amber" id="kpiOccPercent">0%</span>
+            </div>
+            <div class="dash-stat-value mono" id="kpiOcc">0<span style="font-size:14px;color:var(--muted)">%</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:var(--gap-xs)">Based on available trips data</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-header">
+              <span class="dash-stat-label">Pending</span>
+              <span class="pill pill-amber" id="kpiPendingCount">0</span>
+            </div>
+            <div class="dash-stat-value mono" id="kpiPending">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:var(--gap-xs)">Awaiting confirmation</div>
+          </div>
+        </div>
+
+        <div class="dash-chart-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Revenue by route</span>
+              <span class="meta" id="chartSubtitle">From booking data</span>
+            </div>
+            <div class="stack" style="gap:var(--gap-md)" id="routeChart">
+              <div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No data</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Booking status</span>
+            </div>
+            <div class="stack" style="gap:var(--gap-md)" id="statusBreakdown">
+              <div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No data</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-tabs" role="tablist" aria-label="Booking filters">
+          <button class="dash-tab active" data-filter="all" role="tab" aria-selected="true">All bookings</button>
+          <button class="dash-tab" data-filter="confirmed" role="tab" aria-selected="false">Confirmed</button>
+          <button class="dash-tab" data-filter="pending" role="tab" aria-selected="false">Pending</button>
+          <button class="dash-tab" data-filter="cancelled" role="tab" aria-selected="false">Cancelled</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Booking code</th>
+                <th>Passenger</th>
+                <th>Route</th>
+                <th>Date</th>
+                <th>Seat</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bookingTableBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted)">Loading data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="margin-top:var(--gap-xl)">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Fleet overview</span>
+            </div>
+            <div class="stack" style="gap:var(--gap-md)" id="fleetList">
+              <div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">Loading fleet data...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Simulated events</span>
+              <span class="meta">Mock logs</span>
+            </div>
+            <div class="stack" style="gap:var(--gap-sm)" id="eventList">
+              <div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No events</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>&lt;BEF/&gt; · Booking Engine Framework</span>
+      <span class="meta">github.com/bef/bef</span>
+    </div>
+  </footer>
+
+  <script>
+    let allBookings = [];
+    let currentFilter = 'all';
+    let tripsData = [];
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    async function loadAllData() {
+      try {
+        const [bRes, tRes, fRes, eRes] = await Promise.all([
+          fetch('../data/bookings.json'),
+          fetch('../data/trips.json'),
+          fetch('../data/fleet.json'),
+          fetch('../data/events.json')
+        ]);
+        const jsonBookings = await bRes.json();
+        tripsData = await tRes.json();
+        const fleet = await fRes.json();
+        const events = await eRes.json();
+
+        const lsBookings = JSON.parse(localStorage.getItem('bef_bookings') || '[]');
+        allBookings = [...lsBookings, ...jsonBookings];
+
+        renderKPI(allBookings, tripsData);
+        renderCharts(allBookings);
+        renderTable(allBookings, 'all');
+        renderFleet(fleet);
+        renderEvents(events);
+      } catch (e) {
+        console.error('Failed to load data:', e);
+        document.getElementById('bookingTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger)">Failed to load data</td></tr>';
+      }
+    }
+
+    function renderKPI(bookings, trips) {
+      const total = bookings.length;
+      const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+      const pending = bookings.filter(b => b.status === 'pending').length;
+      const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+      const revenue = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+
+      document.getElementById('kpiBookings').textContent = total;
+      document.getElementById('kpiBreakdown').textContent = total + ' total';
+      document.getElementById('kpiRevenue').textContent = '฿ ' + revenue.toLocaleString();
+      document.getElementById('kpiPending').textContent = pending;
+      document.getElementById('kpiPendingCount').textContent = pending;
+
+      const totalSeats = trips.reduce((sum, t) => sum + (t.totalSeats || 0), 0);
+      const occupiedSeats = trips.reduce((sum, t) => {
+        const statuses = Object.values(t.seatStatus || {});
+        return sum + statuses.filter(s => s === 'occupied' || s === 'reserved').length;
+      }, 0);
+      const occPct = totalSeats > 0 ? Math.round(occupiedSeats / totalSeats * 100) : 0;
+      document.getElementById('kpiOcc').textContent = occPct;
+      document.getElementById('kpiOccPercent').textContent = occPct + '%';
+    }
+
+    function renderCharts(bookings) {
+      const routeMap = {};
+      const statusMap = { confirmed: 0, pending: 0, cancelled: 0 };
+
+      bookings.forEach(b => {
+        const route = b.route || 'Unknown';
+        routeMap[route] = (routeMap[route] || 0) + (b.amount || 0);
+        if (statusMap.hasOwnProperty(b.status)) statusMap[b.status]++;
+      });
+
+      const routeEntries = Object.entries(routeMap).sort((a, b) => b[1] - a[1]);
+      const maxRev = routeEntries.length > 0 ? Math.max(...routeEntries.map(e => e[1])) : 1;
+
+      if (routeEntries.length === 0) {
+        document.getElementById('routeChart').innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No booking data</div>';
+      } else {
+        document.getElementById('routeChart').innerHTML = routeEntries.map(([route, rev]) => {
+          const pct = Math.round(rev / maxRev * 100);
+          return '<div>' +
+            '<div class="row-between" style="font-size:12px">' +
+            '<span>' + route + '</span>' +
+            '<span class="mono">฿ ' + rev.toLocaleString() + '</span>' +
+            '</div>' +
+            '<div style="height:6px;background:var(--surface-2);border-radius:3px;margin-top:4px">' +
+            '<div class="chart-bar" style="width:' + pct + '%;height:100%;background:var(--accent);border-radius:3px" role="img" aria-label="' + route + ': ' + pct + '%"></div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+      }
+
+      const totalBookings = Object.values(statusMap).reduce((a, b) => a + b, 0);
+      if (totalBookings === 0) {
+        document.getElementById('statusBreakdown').innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No booking data</div>';
+      } else {
+        const statusColors = { confirmed: 'var(--accent)', pending: 'var(--warn)', cancelled: 'var(--danger)' };
+        const statusLabels = { confirmed: 'Confirmed', pending: 'Pending', cancelled: 'Cancelled' };
+        document.getElementById('statusBreakdown').innerHTML = Object.entries(statusMap).map(([key, val]) => {
+          const pct = Math.round(val / totalBookings * 100);
+          return '<div>' +
+            '<div class="row-between" style="font-size:12px">' +
+            '<span>' + statusLabels[key] + '</span>' +
+            '<span class="mono">' + val + ' (' + pct + '%)</span>' +
+            '</div>' +
+            '<div style="height:6px;background:var(--surface-2);border-radius:3px;margin-top:4px">' +
+            '<div style="width:' + pct + '%;height:100%;background:' + statusColors[key] + ';border-radius:3px" role="img" aria-label="' + statusLabels[key] + ': ' + pct + '%"></div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+      }
+    }
+
+    function renderTable(bookings, filter) {
+      const tbody = document.getElementById('bookingTableBody');
+      let filtered = bookings;
+      if (filter !== 'all') filtered = bookings.filter(b => b.status === filter);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">No bookings match this filter.</td></tr>';
+        return;
+      }
+
+      const statusClasses = { confirmed: 'pill-green', pending: 'pill-amber', cancelled: 'pill-red' };
+      const statusLabels = { confirmed: 'Confirmed', pending: 'Pending', cancelled: 'Cancelled' };
+
+      tbody.innerHTML = filtered.map(b => {
+        const cls = statusClasses[b.status] || 'pill-mono';
+        const label = statusLabels[b.status] || b.status;
+        return '<tr>' +
+          '<td class="mono">' + b.bookingCode + '</td>' +
+          '<td>' + b.passenger + '</td>' +
+          '<td>' + (b.route || b.route) + '</td>' +
+          '<td class="mono">' + (b.departure || '—') + '</td>' +
+          '<td class="mono">' + (b.seat || '—') + '</td>' +
+          '<td class="num-col mono">฿ ' + (b.amount || 0).toLocaleString() + '</td>' +
+          '<td><span class="pill ' + cls + '">' + label + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderFleet(fleet) {
+      const container = document.getElementById('fleetList');
+      container.innerHTML = fleet.map(v => {
+        const statusClass = v.status === 'active' ? 'pill-green' : 'pill-amber';
+        return '<div class="row-between">' +
+          '<div>' +
+          '<div style="font-size:13px;font-weight:500">' + v.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + v.seats + ' seats &middot; ' + (v.type === 'bus' ? 'Bus' : v.type === 'van' ? 'Van' : v.type) + '</div>' +
+          '</div>' +
+          '<span class="pill ' + statusClass + '">' + (v.status === 'active' ? 'Active' : 'Maintenance') + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderEvents(events) {
+      const container = document.getElementById('eventList');
+      if (events.length === 0) {
+        container.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:var(--gap-lg)">No events</div>';
+        return;
+      }
+      const colorMap = {
+        BookingConfirmed: 'var(--accent)',
+        BookingCreated: 'var(--accent)',
+        SeatReserved: 'var(--accent)',
+        BookingCancelled: 'var(--danger)',
+        SeatLockExpired: 'var(--warn)'
+      };
+      container.innerHTML = events.map(e =>
+        '<div class="row-between" style="font-size:11px">' +
+        '<span class="mono" style="color:' + (colorMap[e.type] || 'var(--muted)') + '">' + e.type + '</span>' +
+        '<span class="meta">' + e.ts + '</span>' +
+        '</div>'
+      ).join('');
+    }
+
+    document.querySelectorAll('.dash-tab').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.dash-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+        currentFilter = this.dataset.filter;
+        renderTable(allBookings, currentFilter);
+      });
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      let csv = 'Booking Code,Passenger,Route,Date,Seat,Amount,Status\n';
+      allBookings.forEach(b => {
+        const row = [
+          b.bookingCode,
+          '"' + (b.passenger || '').replace(/"/g, '""') + '"',
+          '"' + (b.route || '').replace(/"/g, '""') + '"',
+          b.departure || '',
+          b.seat || '',
+          b.amount || 0,
+          b.status
+        ];
+        csv += row.join(',') + '\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bef-bookings-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    loadAllData();
+  </script>
+</body>
+</html>

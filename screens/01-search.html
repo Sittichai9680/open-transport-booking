@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search trips · BEF</title>
+  <link rel="stylesheet" href="../css/system.css" />
+  <style>
+    .search-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--gap-lg);
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: var(--gap-md);
+      align-items: end;
+    }
+    .result-count {
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-bottom: var(--gap-md);
+    }
+    .filter-bar {
+      display: flex;
+      gap: var(--gap-sm);
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .filter-btn:hover,
+    .filter-btn:focus-visible { border-color: var(--fg); color: var(--fg); }
+    .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+
+    .loading-state,
+    .empty-state {
+      text-align: center;
+      padding: var(--gap-2xl) var(--gap-lg);
+      color: var(--muted);
+    }
+    .loading-state .spinner {
+      width: 24px; height: 24px;
+      margin: 0 auto var(--gap-md);
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .search-form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-l">
+        <a href="../index.html" class="logo"><span class="logo-accent">&lt;</span>BEF<span class="logo-accent">/&gt;</span></a>
+      </div>
+      <nav>
+        <a href="../index.html">Overview</a>
+        <a href="01-search.html" class="active">Search</a>
+        <a href="05-dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section" data-od-id="search-form" style="padding-bottom:0">
+      <div class="container">
+        <h2 class="search-form-title">Search trips</h2>
+        <form class="search-form" id="searchForm">
+          <div class="field">
+            <label for="origin">Origin</label>
+            <select class="select" id="origin" aria-label="Origin">
+              <option value="กรุงเทพฯ (BKK)">กรุงเทพฯ (BKK)</option>
+              <option value="เชียงใหม่ (CNX)">เชียงใหม่ (CNX)</option>
+              <option value="ภูเก็ต (HKT)">ภูเก็ต (HKT)</option>
+              <option value="กระบี่ (KBV)">กระบี่ (KBV)</option>
+              <option value="หัวหิน (HHQ)">หัวหิน (HHQ)</option>
+              <option value="พัทยา (UTP)">พัทยา (UTP)</option>
+              <option value="เชียงราย (CEI)">เชียงราย (CEI)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="destination">Destination</label>
+            <select class="select" id="destination" aria-label="Destination">
+              <option value="เชียงใหม่ (CNX)">เชียงใหม่ (CNX)</option>
+              <option value="กรุงเทพฯ (BKK)">กรุงเทพฯ (BKK)</option>
+              <option value="ภูเก็ต (HKT)">ภูเก็ต (HKT)</option>
+              <option value="กระบี่ (KBV)">กระบี่ (KBV)</option>
+              <option value="หัวหิน (HHQ)">หัวหิน (HHQ)</option>
+              <option value="พัทยา (UTP)">พัทยา (UTP)</option>
+              <option value="เชียงราย (CEI)">เชียงราย (CEI)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="results" id="results">
+      <div class="container">
+        <div id="resultsArea">
+          <div class="loading-state" id="loadingState" style="display:none">
+            <div class="spinner" role="status" aria-label="Loading trips"></div>
+            <span class="result-count">Searching trips...</span>
+          </div>
+          <div class="empty-state" id="emptyState" style="display:none">
+            <p>No trips found. Try different origin or destination.</p>
+          </div>
+
+          <div id="resultsContent" style="display:none">
+            <div class="row-between results-header">
+              <div>
+                <span class="result-count" id="resultCount">0 trips found</span>
+              </div>
+              <div id="operatorTags"></div>
+            </div>
+
+            <div class="filter-bar" id="filterBar">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="VIP">VIP</button>
+              <button class="filter-btn" data-filter="Standard">Standard</button>
+              <button class="filter-btn" data-filter="Mini Bus">Mini Bus</button>
+            </div>
+
+            <div id="tripList"></div>
+          </div>
+        </div>
+
+        <div id="initialPrompt" class="loading-state">
+          <p>Enter origin and destination to search trips.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>&lt;BEF/&gt; · Booking Engine Framework</span>
+      <span class="meta">Reference UI · Mock Data</span>
+    </div>
+  </footer>
+
+  <script>
+    let allTrips = [];
+    let currentFilter = 'all';
+
+    async function loadTrips() {
+      try {
+        const res = await fetch('../data/trips.json');
+        allTrips = await res.json();
+      } catch (e) {
+        console.error('Failed to load trips:', e);
+        allTrips = [];
+      }
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const origin = document.getElementById('origin').value;
+      const dest = document.getElementById('destination').value;
+      const resultsArea = document.getElementById('resultsArea');
+      const loading = document.getElementById('loadingState');
+      const empty = document.getElementById('emptyState');
+      const content = document.getElementById('resultsContent');
+      const prompt = document.getElementById('initialPrompt');
+
+      prompt.style.display = 'none';
+      content.style.display = 'none';
+      empty.style.display = 'none';
+      loading.style.display = 'block';
+
+      if (allTrips.length === 0) await loadTrips();
+
+      loading.style.display = 'none';
+
+      let filtered = allTrips.filter(t => {
+        const originMatch = t.origin.includes(origin) || t.origin === origin;
+        const destMatch = t.destination.includes(dest) || t.destination === dest;
+        return originMatch && destMatch;
+      });
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      let currentFiltered = [...filtered];
+
+      document.getElementById('resultCount').textContent = filtered.length + ' trips found';
+      content.style.display = 'block';
+      empty.style.display = 'none';
+
+      const operatorTags = document.getElementById('operatorTags');
+      const ops = [...new Set(filtered.map(t => t.operator))];
+      operatorTags.innerHTML = ops.map(o => `<span class="pill pill-green">${o}</span>`).join('');
+
+      const filterBar = document.getElementById('filterBar');
+      filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.onclick = function() {
+          filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          renderTrips(currentFiltered, currentFilter);
+        };
+      });
+
+      renderTrips(currentFiltered, currentFilter);
+
+      function renderTrips(trips, filter) {
+        const list = document.getElementById('tripList');
+        const filteredTrips = filter === 'all' ? trips : trips.filter(t => t.class === filter);
+
+        if (filteredTrips.length === 0) {
+          list.innerHTML = '<div class="empty-state"><p>No trips match this filter.</p></div>';
+          return;
+        }
+
+        list.innerHTML = filteredTrips.map(t => {
+          const isSoldOut = t.availableSeats === 0;
+          const seatLabel = isSoldOut ? '<span style="color:var(--danger)">Sold Out</span>' : (t.availableSeats + ' seats left');
+          const actionBtn = isSoldOut
+            ? '<span class="btn btn-ghost btn-sm mono" style="cursor:default;color:var(--muted)">Unavailable</span>'
+            : `<a href="02-seat.html?trip=${t.id}" class="btn btn-secondary btn-sm mono">Select</a>`;
+          return `<div class="trip-row">
+            <div>
+              <div class="trip-route">${t.route}</div>
+              <div class="trip-time" style="margin-top:2px">${t.departure} &ndash; ${t.arrival} &middot; ${t.duration}</div>
+            </div>
+            <div><span class="pill ${t.class === 'VIP' ? 'pill-green' : t.class === 'Standard' ? 'pill-amber' : 'pill-mono'}">${t.class}</span></div>
+            <div class="trip-price">฿ ${t.price.toLocaleString()}</div>
+            <div class="trip-seats" style="${t.availableSeats <= 3 && t.availableSeats > 0 ? 'color:var(--warn)' : ''}">${seatLabel}</div>
+            ${actionBtn}
+          </div>`;
+        }).join('');
+      }
+    });
+
+    loadTrips();
+  </script>
+</body>
+</html>

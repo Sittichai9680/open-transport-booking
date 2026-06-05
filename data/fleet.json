@@ -1,0 +1,32 @@
+[
+  {
+    "id": "veh-001",
+    "name": "VIP-32",
+    "type": "bus",
+    "operator": "Green Transport Co., Ltd.",
+    "seats": 32,
+    "deck": "single",
+    "status": "active",
+    "lastMaintenance": "2026-06-01"
+  },
+  {
+    "id": "veh-002",
+    "name": "Mini-12",
+    "type": "van",
+    "operator": "Phetprasert Van",
+    "seats": 12,
+    "deck": "single",
+    "status": "active",
+    "lastMaintenance": "2026-05-20"
+  },
+  {
+    "id": "veh-003",
+    "name": "SL-45",
+    "type": "bus",
+    "operator": "Nakhonchai Air",
+    "seats": 45,
+    "deck": "double",
+    "status": "maintenance",
+    "lastMaintenance": "2026-06-10"
+  }
+]

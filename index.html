@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BEF · Booking Engine Framework</title>
+  <link rel="stylesheet" href="css/system.css" />
+  <style>
+    .launcher-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap-md);
+    }
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--gap-xl) var(--gap-lg);
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .module-card:hover {
+      border-color: var(--fg);
+      background: var(--surface-2);
+    }
+    .module-card h3 { font-size: 15px; margin-bottom: var(--gap-xs); }
+    .module-card p { color: var(--muted); font-size: 12px; max-width: 30ch; }
+    .module-card .module-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-top: var(--gap-md);
+    }
+    .module-card .module-icon {
+      width: 28px; height: 28px;
+      margin-bottom: var(--gap-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: grid; place-items: center;
+      color: var(--accent);
+    }
+    .arch-diagram {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: var(--gap-md);
+      align-items: center;
+    }
+    .arch-stack {
+      display: flex; flex-direction: column;
+      gap: var(--gap-sm);
+    }
+    .arch-layer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--gap-md);
+      text-align: center;
+    }
+    .arch-layer .layer-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+    .arch-layer .layer-tech {
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .arch-connector {
+      display: flex; flex-direction: column;
+      align-items: center; gap: var(--gap-xs);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    @media (max-width: 920px) {
+      .launcher-grid { grid-template-columns: 1fr; }
+      .arch-diagram { grid-template-columns: 1fr; }
+      .arch-connector { flex-direction: row; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-l">
+        <span class="logo"><span class="logo-accent">&lt;</span>BEF<span class="logo-accent">/&gt;</span></span>
+        <span class="pill pill-green">v1.0.0-alpha</span>
+        <span class="honest-badge">Design prototype</span>
+      </div>
+      <nav>
+        <a href="index.html" class="active">Overview</a>
+        <a href="screens/01-search.html">Search</a>
+        <a href="screens/05-dashboard.html">Dashboard</a>
+      </nav>
+      <a href="https://github.com/bef/bef" class="btn btn-secondary btn-sm">GitHub</a>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section hero" data-od-id="hero">
+      <div class="container hero-center">
+        <p class="label-sm" style="margin-bottom:var(--gap-md);letter-spacing:0.08em;text-transform:uppercase">
+          Open-Source Booking Framework
+        </p>
+        <h1>A framework for building booking systems. Not another bus-ticket website.</h1>
+        <p class="lead">
+          Provider-agnostic engine. Plugin-based transport adapters. One-click Docker setup.
+          Design prototype for what will be a booking engine framework.
+        </p>
+        <div class="hero-cta">
+          <a href="screens/01-search.html" class="btn btn-primary">Try passenger flow</a>
+          <a href="screens/05-dashboard.html" class="btn btn-secondary">Operator dashboard</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="architecture">
+      <div class="container">
+        <h2 style="margin-bottom:var(--gap-xl);text-align:center">Proposed Architecture</h2>
+        <div class="arch-diagram" style="max-width:840px;margin:0 auto">
+          <div class="arch-stack">
+            <div class="arch-layer">
+              <div class="layer-name">@bef/web</div>
+              <div class="layer-tech">Next.js · Passenger UI</div>
+            </div>
+            <div class="arch-layer">
+              <div class="layer-name">@bef/admin</div>
+              <div class="layer-tech">Next.js · Operator Panel</div>
+            </div>
+            <div class="arch-layer" style="border-color:var(--accent)">
+              <div class="layer-name" style="color:var(--accent)">@bef/api</div>
+              <div class="layer-tech">NestJS · REST API</div>
+            </div>
+            <div class="arch-layer">
+              <div class="layer-name">@bef/core</div>
+              <div class="layer-tech">Booking Engine (interface)</div>
+            </div>
+          </div>
+          <div class="arch-connector">
+            <span>←→</span>
+            <span style="font-size:9px">Adapter<br/>Interface</span>
+            <span>←→</span>
+          </div>
+          <div class="arch-stack">
+            <div class="arch-layer">
+              <div class="layer-name">BusProvider</div>
+              <div class="layer-tech">Bus · Van</div>
+            </div>
+            <div class="arch-layer">
+              <div class="layer-name">TrainProvider</div>
+              <div class="layer-tech">Railway</div>
+            </div>
+            <div class="arch-layer">
+              <div class="layer-name">BoatProvider</div>
+              <div class="layer-tech">Ferry</div>
+            </div>
+            <div class="arch-layer" style="border-style:dashed">
+              <div class="layer-name" style="color:var(--muted)">YourProvider</div>
+              <div class="layer-tech">Community Adapter</div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:var(--gap-md)">Target architecture · Not yet implemented in this prototype</p>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="modules">
+      <div class="container">
+        <h2 style="margin-bottom:var(--gap-xl)">Planned packages</h2>
+        <div class="launcher-grid">
+          <a class="module-card" href="screens/01-search.html">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">@</span>
+            </div>
+            <h3>@bef/web</h3>
+            <p>Reference passenger UI: search, seat map, checkout, confirmation. Responsive.</p>
+            <div class="module-tag">screens/01-04 · Prototype</div>
+          </a>
+          <a class="module-card" href="screens/05-dashboard.html">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">#</span>
+            </div>
+            <h3>@bef/admin</h3>
+            <p>Operator dashboard: booking list, revenue stats, fleet overview.</p>
+            <div class="module-tag">screens/05 · Prototype</div>
+          </a>
+          <div class="module-card">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">{}</span>
+            </div>
+            <h3>@bef/core</h3>
+            <p>Framework-agnostic booking engine. TripProvider interface, seat lock service.</p>
+            <div class="module-tag">Planned</div>
+          </div>
+          <div class="module-card">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">&harr;</span>
+            </div>
+            <h3>@bef/providers</h3>
+            <p>Built-in adapters: MockProvider, BusProvider, TrainProvider, BoatProvider.</p>
+            <div class="module-tag">Planned</div>
+          </div>
+          <div class="module-card">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">&gt;_</span>
+            </div>
+            <h3>@bef/api</h3>
+            <p>NestJS REST layer. Thin wrapper over @bef/core.</p>
+            <div class="module-tag">Planned</div>
+          </div>
+          <div class="module-card">
+            <div class="module-icon">
+              <span style="font-size:14px;font-family:var(--font-mono)">DB</span>
+            </div>
+            <h3>Demo Data Seeder</h3>
+            <p>Thai-realistic routes (BKK-CNX, HKT-KBV), 8 trips, 3 vehicles. Loads from JSON.</p>
+            <div class="module-tag">data/*.json · Mock data</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="quickstart" style="text-align:center">
+      <div class="container" style="max-width:640px">
+        <h2>How to explore this prototype</h2>
+        <p class="lead" style="margin:var(--gap-md) auto var(--gap-xl)">
+          This is a client-side HTML prototype with mock data from JSON files. No server required.
+        </p>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--gap-md);text-align:left;max-width:480px;margin:0 auto">
+          <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent)">$ npx serve .</code>
+        </div>
+        <div style="margin-top:var(--gap-lg);display:flex;gap:var(--gap-md);justify-content:center;flex-wrap:wrap">
+          <span class="label-sm">Static HTML</span>
+          <span class="label-sm">Mock JSON Data</span>
+          <span class="label-sm">Client-side JS</span>
+          <span class="label-sm">No Dependencies</span>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:var(--gap-lg)">
+          Backend and Docker Compose setup coming in v1.0.0.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>&lt;BEF/&gt; · Booking Engine Framework · MIT License</span>
+      <span class="meta">Design prototype · Mock data · github.com/bef/bef</span>
+    </div>
+  </footer>
+</body>
+</html>
