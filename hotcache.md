@@ -1,18 +1,20 @@
 # hotcache — open-transport-booking
 
-**Last updated:** 2026-06-05 14:55 UTC+7
-**Session:** Design review → grill-me → implementation
+**Last updated:** 2026-06-05 15:28 UTC+7
+**Session:** Design review → grill-me → implementation → publish
 
 ## Files
 - `src/` — 9 files — types, trip-provider, booking-service, seat-lock-service, seat-lock-in-memory, reducer, mock-provider, seat-layout, index
 - `test/` — 6 files — 56 core tests
 - `packages/seat-lock-redis/` — merged, 9 tests passing (Redis)
+- `packages/line-chatbot/` — reverted (not requested)
 - `DESIGN.md` — APPROVED, 20 decisions
 - `README.md`, `CHANGELOG.md`, `LICENSE`, `jsr.json`, `.gitignore`, `hotcache.md`
 
 ## State
 - 65/65 tests passing, 7 test files, build clean (`tsc --strict`)
 - Redis running via `brew services start redis`
+- package.json: `@bef/core` (design doc name)
 
 ## Next
 - npm publish: needs browser OAuth (`npm login`, `npm publish --access public`)
