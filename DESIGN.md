@@ -81,9 +81,14 @@ interface Seat {
   metadata?: Record<string, unknown>;
 }
 
+// LiveSeat is Seat with runtime status overlay
+interface LiveSeat extends Omit<Seat, 'status'> {
+  status: SeatRuntimeStatus; // 'available' | 'locked' | 'booked' | 'unavailable'
+}
+
 // ---- Trips ----
 
-interface Trip {
+interface Trip {   // metadata only — no seats array; use getSeatMap() for seat data
   id: string;
   origin: string;
   destination: string;
@@ -91,7 +96,6 @@ interface Trip {
   arrivalTime: Date;
   operator: string;
   vehicleType: 'bus' | 'van' | 'train' | 'boat' | 'ferry';
-  seats: Seat[];
   metadata?: Record<string, unknown>; // mode-specific fields
 }
 
@@ -106,7 +110,7 @@ type BookingEvent =
 
 // ---- Booking ----
 
-type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'expired';
+type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
 
 interface Booking {
   id: string;
@@ -164,23 +168,38 @@ No cross-source assertions — graceful overlay handles transient states (e.g., 
 ### BookingService Interface
 
 ```typescript
+// Interface — consumers type against this, not construct it
 interface BookingService {
-  new (tripProvider: TripProvider, seatLockService: SeatLockService): BookingService;
   createBooking(tripId: string, seatIds: string[], userId: string): Promise<Booking>;
   confirmBooking(bookingId: string): Promise<Booking>;
   cancelBooking(bookingId: string, reason?: string): Promise<Booking>;
   getBooking(bookingId: string): Promise<Booking | null>;
-  getLiveSeatMap(tripId: string): Promise<Seat[]>; // TripProvider.getSeatMap() +
-                                                     // lock state overlay + booking records
+  getLiveSeatMap(tripId: string): Promise<LiveSeat[]>; // TripProvider.getSeatMap() +
+                                                       // lock state overlay + booking records
   releaseExpiredBookings(): Promise<Booking[]>;
+}
+
+// Implementation class — this is what consumers construct
+class BookingServiceImpl implements BookingService {
+  constructor(
+    tripProvider: TripProvider,
+    seatLockService: SeatLockService,
+    options?: { maxBookings?: number }  // default 10,000 — throws RESOURCE_EXHAUSTED if exceeded
+  ) { ... }
+
+  // ... method implementations
 }
 ```
 
-Constructor injection: `BookingService` receives `TripProvider` and `SeatLockService` at construction time. No DI container required — plain TypeScript. Both mockable in tests.
+Constructor injection on `BookingServiceImpl`: receives `TripProvider` and `SeatLockService` at construction time. No DI container required — plain TypeScript. Both mockable in tests. `BookingService` interface is for typing only.
 
 `releaseExpiredBookings()` scans all `pending` bookings, checks each seat's lock via `SeatLockService.isLocked()`, and auto-cancels any with expired locks. Consumer owns scheduling (setInterval, cron, etc.) — `BookingService` remains passive/pure.
 
-**Multi-seat booking is all-or-nothing atomic.** `createBooking` locks all `seatIds` in order. If any `acquireLock` returns false, all previously-acquired locks are released (inverse order), and the method throws `SEAT_UNAVAILABLE` with the failing seat ID in the message. No partial bookings — consumer retries.
+**Multi-seat booking is all-or-nothing atomic.** `createBooking` sorts `seatIds` lexicographically, then locks all in order (prevents deadlock). If any `acquireLock` returns false, all previously-acquired locks are released in inverse sorted order, and the method throws `SEAT_UNAVAILABLE` with the failing seat ID in the message. No partial bookings — consumer retries.
+
+**Lock release during rollback is best-effort.** If `releaseLock` fails during inverse-order cleanup, the error is logged and the method continues releasing remaining locks. Any leaked locks expire after TTL (default 10 min). Consumer can call `SeatLockService.forceReleaseAll(bookingId)` for emergency cleanup.
+
+**Bounded in-memory storage.** Constructor accepts `maxBookings` (default 10,000). `createBooking` checks `this.bookings.size >= maxBookings` before locking and throws `RESOURCE_EXHAUSTED` if exceeded. Prevents unbounded growth in long-running single-process deployments.
 
 ### SeatLockService Interface
 
@@ -191,6 +210,8 @@ interface SeatLockService {
   renewLock(seatId: string, bookingId: string, ttlMs: number): Promise<boolean>;
   isLocked(seatId: string): Promise<boolean>;
   getLockOwner(seatId: string): Promise<string | null>;
+  forceReleaseAll(bookingId: string): Promise<number>; // returns count of locks released
+                                                       // admin recovery — releases all locks for bookingId
 }
 ```
 
@@ -201,7 +222,7 @@ class BookingError extends Error {
   constructor(
     message: string,
     public code: 'SEAT_UNAVAILABLE' | 'LOCK_EXPIRED' | 'BOOKING_NOT_FOUND'
-      | 'INVALID_STATE_TRANSITION' | 'CONCURRENT_MODIFICATION',
+      | 'INVALID_STATE_TRANSITION' | 'CONCURRENT_MODIFICATION' | 'RESOURCE_EXHAUSTED',
   ) {
     super(message);
   }
@@ -258,18 +279,18 @@ Uses a `Map<string, { bookingId: string; expiresAt: number }>` with `setTimeout`
 
 ## MockProvider Fixtures
 
-`MockProvider` implements `TripProvider` with these fixtures (all loaded at construction, zero config):
+`MockProvider` implements `TripProvider` with these fixtures (all loaded at construction, zero config, pure physical inventory):
 
-| ID | Scenario | Trip | Seats | Edge case |
-|----|----------|------|-------|-----------|
-| `bkk-chiang-mai` | Standard bus | BKK→Chiang Mai, single deck, 40 seats | 35 available, 5 booked | Normal search result |
-| `bkk-pattaya` | Sold-out trip | BKK→Pattaya, single deck, 12 seats | 0 available | All seats booked — `searchTrips` returns trip but `getSeatMap` shows no availability |
-| `bkk-phuket` | Double-decker | BKK→Phuket, upper+lower deck, 48 seats | Mix of upper/lower availability | Exercises multi-deck seat layout |
+| ID | Scenario | Trip | Physical seats | Purpose |
+|----|----------|------|-----------------|---------|
+| `bkk-chiang-mai` | Standard bus | BKK→Chiang Mai, single deck, 40 seats | 35 `available`, 5 `unavailable` | Normal search result with mixed availability |
+| `bkk-pattaya` | Sold-out trip | BKK→Pattaya, single deck, 12 seats | 12 `unavailable` | All seats unavailable — `searchTrips` returns trip but `getSeatMap` shows zero `available` |
+| `bkk-phuket` | Double-decker | BKK→Phuket, upper+lower deck, 48 seats | Mix of upper/lower `available`/`unavailable` | Exercises multi-deck seat layout |
 | `bkk-koh-samui` | Multi-segment | BKK→Surat Thani→Koh Samui (ferry leg) | Bus 40 seats + ferry 200 seats | Tests multi-vehicle trip composition (demonstrates extensibility beyond bus) |
-| `bkk-hua-hin` | Van (mode extensibility proof) | BKK→Hua Hin, van, 12 seats | 10 available, 2 booked | Non-bus vehicle type — proves `TripProvider` works across modes |
-| `hat-yai-padang-besar` | Single-seat trip | Hat Yai→Padang Besar, van, 1 seat remaining | 1 available, 11 booked | Tests one-seat-left race condition handling |
+| `bkk-hua-hin` | Van (mode extensibility proof) | BKK→Hua Hin, van, 12 seats | 10 `available`, 2 `unavailable` | Non-bus vehicle type — proves `TripProvider` works across modes |
+| `hat-yai-padang-besar` | Single-seat trip | Hat Yai→Padang Besar, van, 12 seats | 1 `available`, 11 `unavailable` | Tests one-seat-left race condition handling |
 
-`searchTrips({})` returns all 6. `searchTrips({ origin: 'BKK' })` returns the 5 BKK-origin trips. `getTrip('bkk-chiang-mai')` returns that fixture. Consumer discovers trips via search, then loads detail on demand.
+Pre-seeded bookings are NOT part of `MockProvider` — that's `BookingService` state, not provider state. Test scenarios seed bookings via `BookingService.createBooking()` / `confirmBooking()`. The "sold-out" fixture has zero `available` seats at the physical level; it does not simulate 12 booked seats.
 
 ## Test Scope
 
@@ -388,7 +409,7 @@ The package is also the foundation everything else builds on. Approaches B and C
 
 ```typescript
 // Types (for consumer type annotations)
-export type { Seat, SeatPhysicalStatus, SeatRuntimeStatus, Trip, TripSummary, TripSearchQuery, TripSearchResult, Booking, BookingStatus, BookingEvent };
+export type { Seat, SeatPhysicalStatus, SeatRuntimeStatus, LiveSeat, Trip, TripSummary, TripSearchQuery, TripSearchResult, Booking, BookingStatus, BookingEvent };
 export type { TripProvider } from './trip-provider';
 export interface BookingService { /* ... */ }    // interface — consumers type against this
 export interface SeatLockService { /* ... */ }   // interface — consumers type against this
@@ -411,8 +432,9 @@ Interfaces separate from classes: `BookingServiceImpl` implements `BookingServic
 
 ```
 src/
-  types.ts              # Seat, SeatPhysicalStatus, SeatRuntimeStatus, Trip, TripSummary,
-                        #   Booking, BookingStatus, BookingEvent, TripSearchQuery,
+  types.ts              # Seat, SeatPhysicalStatus, SeatRuntimeStatus, LiveSeat,
+                        #   Trip (metadata-only, no seats), TripSummary, Booking,
+                        #   BookingStatus, BookingEvent, TripSearchQuery,
                         #   TripSearchResult, BookingError
   trip-provider.ts      # TripProvider interface
   booking-service.ts    # BookingService interface + BookingServiceImpl class
@@ -449,11 +471,11 @@ Flat — 8 source files, 5 test files. No subdirectories. Zero config needed to 
 
 ## Dependencies
 
-- Node.js 18+ (LTS)
-- TypeScript 5.x
+- Node.js 18+ (LTS) with `"type": "module"` and TypeScript 5.x
 - Vitest (dev dependency for testing)
 - No runtime dependencies (zero deps in production)
 - Redis NOT required for v1 — `InMemorySeatLockService` ships in core. Separate `@bef/seat-lock-redis` package in post-v1.
+- Package manager: pnpm (workspace-aware, fast, strict dependency resolution). No `package-lock.json` or `yarn.lock` — `pnpm-lock.yaml` only.
 
 ## Sustainability
 
@@ -481,3 +503,13 @@ That 30-minute conversation is worth more than 3 weeks of coding. If they say ye
 8. **`getLiveSeatMap` overlay priority** — bookings win > locks win > provider baseline. Graceful overlay, no cross-source assertions.
 9. **Interface/Implementation separation** — `BookingService` interface + `BookingServiceImpl` class. `SeatLockService` interface + `InMemorySeatLockService` class. Consumer types against interfaces, constructs classes. `reduceBooking`: pure function export.
 10. **Flat source layout** — 8 source files, 5 test files, no subdirectories. `index.ts` barrel.
+11. **`LiveSeat` type** — `getLiveSeatMap()` returns `LiveSeat extends Omit<Seat, 'status'>` with `status: SeatRuntimeStatus`. Separate from `Seat` which only carries `SeatPhysicalStatus`. Type-safe — consumer can't confuse physical inventory with runtime overlay.
+12. **Bounded in-memory storage** — `BookingServiceImpl` constructor accepts `maxBookings` (default 10,000). `createBooking` throws `RESOURCE_EXHAUSTED` if exceeded. Prevents unbounded growth in long-running single-process deployments.
+13. **`constructor(...)` not `new (...)`** — `BookingServiceImpl` exposes a standard constructor, not a `new`-sig on the interface. `BookingService` interface has no `new` — it's for typing, not construction.
+14. **MockProvider is pure physical inventory** — no pre-seeded bookings. Fixtures describe `SeatPhysicalStatus` only. Test scenarios seed bookings via `BookingService.createBooking()` / `confirmBooking()`. "Sold-out" = all seats `unavailable`, not 12 runtime bookings.
+15. **pnpm** — package manager. `pnpm-lock.yaml` only. No npm/yarn lockfiles.
+16. **`Trip` is metadata-only** — no `seats` array. `getSeatMap(tripId)` is the sole seat data source. Avoids duplication and inconsistency between `Trip.seats` / `getSeatMap()`.
+17. **`expired` booking status removed** — unreachable via any event or state transition. `releaseExpiredBookings` triggers `cancelBooking` → `BookingCancelled` → `cancelled`. Statuses: `pending` | `confirmed` | `cancelled`.
+18. **`forceReleaseAll(bookingId)` on `SeatLockService`** — emergency cleanup for rollback failures. Returns count of locks released. One-line in-memory impl (Map iteration).
+19. **Deterministic lock ordering** — `createBooking` sorts `seatIds` lexicographically before locking. Guarantees no deadlock regardless of consumer booking order. Inverse order on rollback.
+20. **Best-effort rollback** — failed `releaseLock` during cleanup is logged, cleanup continues, leaked locks expire after TTL. `forceReleaseAll` as safety net.
