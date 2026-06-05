@@ -52,7 +52,7 @@ Three interfaces, three implementations:
 | Interface | Built-in | Production |
 |---|---|---|
 | `TripProvider` | `MockProvider` (6 fixtures) | You implement for your operator |
-| `SeatLockService` | `InMemorySeatLockService` | `@bef/seat-lock-redis` (coming soon) |
+| `SeatLockService` | `InMemorySeatLockService` | `@sittichai/seat-lock-redis` (coming soon) |
 | `BookingService` | `BookingServiceImpl` | Same class, pluggable adapters |
 
 ## Features

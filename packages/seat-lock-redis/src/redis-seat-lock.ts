@@ -1,4 +1,4 @@
-import type { SeatLockService } from '@bef/core';
+import type { SeatLockService } from '@sittichai/bef-core';
 import { Redis } from 'ioredis';
 
 /**

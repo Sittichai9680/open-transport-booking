@@ -1,7 +1,7 @@
 {
-  "name": "@bef/seat-lock-redis",
+  "name": "@sittichai/seat-lock-redis",
   "version": "0.0.1-alpha",
-  "description": "Redis-backed SeatLockService for @bef/core — production-grade distributed seat locking",
+  "description": "Redis-backed SeatLockService for @sittichai/bef-core — production-grade distributed seat locking",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.30.3",
   "peerDependencies": {
-    "@bef/core": "workspace:*"
+    "@sittichai/bef-core": "workspace:*"
   },
   "dependencies": {
     "ioredis": "^5.4.0"
