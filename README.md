@@ -1,15 +1,15 @@
-# @bef/core
+# @sittichai/bef-core
 
 Framework-agnostic, zero-dependency TypeScript booking engine for transport booking systems.
 
 ```bash
-npm install @bef/core
+npm install @sittichai/bef-core
 ```
 
 ## Quickstart
 
 ```typescript
-import { BookingServiceImpl, MockProvider, InMemorySeatLockService } from '@bef/core';
+import { BookingServiceImpl, MockProvider, InMemorySeatLockService } from '@sittichai/bef-core';
 
 const provider = new MockProvider();
 const locks = new InMemorySeatLockService();
