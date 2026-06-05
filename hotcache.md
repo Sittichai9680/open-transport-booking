@@ -1,16 +1,16 @@
 # hotcache — open-transport-booking
 
-**Last updated:** 2026-06-05 14:01 UTC+7
-**Session:** Design review → grill-me → implementation → publish prep
+**Last updated:** 2026-06-05 23:25 UTC+14:27
+**Session:** Design review → grill-me → implementation → publish attempts
 
 ## Files changed
-- `src/` — 9 files (types, trip-provider, booking-service, seat-lock-service, seat-lock-in-memory, reducer, mock-provider, seat-layout, index)
-- `test/` — 6 files (56 tests, all passing)
-- `DESIGN.md` — approved, 20 decisions logged
-- `README.md`, `CHANGELOG.md`, `LICENSE`, `jsr.json`, `package.json`, `tsconfig.json`, `pnpm-workspace.yaml`, `.gitignore`
-- `packages/seat-lock-redis/` — scaffolded, not merged
+- `src/` — 9 files (876 lines) — types, trip-provider, booking-service, seat-lock-service, seat-lock-in-memory, reducer, mock-provider, seat-layout, index
+- `test/` — 6 files (584 lines) — 56 tests, all passing
+- `DESIGN.md` — reviewed 8/10, APPROVED, 20 decisions logged
+- `PRD.md` — gap-analyzed, 2 gaps fixed
+- `README.md`, `CHANGELOG.md`, `LICENSE`, `jsr.json`, `package.json`, `tsconfig.json`, `pnpm-workspace.yaml`, `.gitignore`, `hotcache.md`
 
 ## Next step
-- `npm login` then `npm publish --access public` (blocked on auth)
-- `npx jsr publish` (blocked on auth)
-- Redis tests need Docker: `docker run -d -p 6379:6379 redis:7` then `cd packages/seat-lock-redis && pnpm test`
+- npm publish: needs browser OAuth (`npm login` in your terminal, then `npm publish --access public`)
+- JSR publish: needs browser OAuth (`npx jsr publish`)
+- Redis package: `feature/seat-lock-redis-scaffold` has full source, needs `docker run redis:7` for tests
