@@ -350,9 +350,35 @@ TypeScript script — seed routes, vehicles, trips, seats
 ## Open Source
 
 - **License**: MIT
-- **Monorepo**: ยังไม่ตัดสินใจ (Turborepo vs Nx vs pnpm workspaces)
+- **Monorepo**: pnpm workspaces
+- **npm package**: `@sittichai/bef-core`
 - **Contributing guide**: TODO
 - **Roadmap**: ใน GitHub Projects
+
+### Architecture Decision
+
+PRD เดิมเสนอ 3 approaches:
+- A) npm package first (sharpest wedge)
+- B) Docker Compose MVP (full platform)
+- C) GitHub Template Repo — Clone & Deploy
+
+**ตัดสินใจเลือก Approach A ก่อน → ต่อด้วย Approach C** โดยใช้ pnpm workspaces (ไม่ใช้ Turborepo/Nx)
+
+### Implementation Status (2026-06-05)
+
+| Package | Status | Tests |
+|---|---|---|
+| `@sittichai/bef-core` | v0.1.0 — published | 80 passing |
+| `@sittichai/seat-lock-redis` | Merged — Redis backing | 9 passing |
+| `@sittichai/bef-api` | Next — NestJS REST API | — |
+| `@sittichai/bef-web` | Planned — Next.js frontend | — |
+| `@sittichai/bef-admin` | Planned — Operator dashboard | — |
+
+- **Core engine**: Pure TypeScript, zero runtime deps, ESM-only
+- **Redis lock**: Lua scripts for atomicity, testcontainers-ready
+- **Monorepo**: pnpm workspaces with `packages/*`
+- **Build**: tsc per package, vitest across all
+- **CI/CD**: GitHub Actions planned (manual publish for 0.x)
 
 ---
 
