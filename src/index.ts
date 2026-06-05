@@ -28,3 +28,9 @@ export { MockProvider } from './mock-provider.js';
 
 // Utilities
 export { reduceBooking } from './reducer.js';
+export {
+  seatLayoutToFlat,
+  flatToSeatLayout,
+  liveSeatLayoutToRender,
+} from './seat-layout.js';
+export type { SeatRow } from './seat-layout.js';

@@ -68,7 +68,7 @@ export class BookingServiceImpl implements BookingService {
     try {
       // All-or-nothing lock acquire
       for (const seatId of sorted) {
-        const acquired = await this.seatLockService.acquireLock(seatId, 'pending', 600_000); // 10 min default
+        const acquired = await this.seatLockService.acquireLock(seatId, 'pending', 900_000); // 15 min default (matching PRD FR-003)
         if (!acquired) {
           throw new BookingError(`Seat ${seatId} is unavailable`, 'SEAT_UNAVAILABLE');
         }
@@ -96,7 +96,7 @@ export class BookingServiceImpl implements BookingService {
     // Release placeholder locks and re-acquire with real bookingId
     for (const seatId of sorted) {
       await this.seatLockService.releaseLock(seatId, 'pending');
-      const acquired = await this.seatLockService.acquireLock(seatId, bookingId, 600_000);
+      const acquired = await this.seatLockService.acquireLock(seatId, bookingId, 900_000); // 15 min
       if (!acquired) {
         // Race condition: someone grabbed the seat between release and re-acquire
         // Best-effort cleanup

@@ -260,7 +260,7 @@ Invalid transitions (e.g. confirming an already-cancelled booking) throw `Bookin
 
 - **Pessimistic locking**: `acquireLock` uses atomic check-and-set. A seat can only be locked by one `bookingId` at a time.
 - **Lock key**: `seat:{seatId}:lock` → value is `bookingId`.
-- **Default TTL**: 10 minutes (600,000 ms). Configurable per call.
+- **Default TTL**: 15 minutes (900,000 ms). Configurable per call.
 - **On expiry**: lock is released atomically by the store. Booking transitions to `cancelled` if consumer calls `cancelBooking` before `confirmBooking`. Lock expiry does NOT auto-cancel the booking — the consumer detects expiration on next `confirmBooking` or `renewLock` call and handles it.
 - **Atomicity guarantee**: In-memory impl uses `Map` with synchronous access (suitable for single-process testing). Redis impl uses `SET seat:{seatId}:lock {bookingId} NX PX {ttlMs}` with Lua script for release (check-then-delete in one round trip).
 - **Lock renewal**: Call `renewLock` to extend TTL during long checkout flows.
