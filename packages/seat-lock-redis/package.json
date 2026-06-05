@@ -1,0 +1,42 @@
+{
+  "name": "@bef/seat-lock-redis",
+  "version": "0.0.1-alpha",
+  "description": "Redis-backed SeatLockService for @bef/core — production-grade distributed seat locking",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "booking",
+    "redis",
+    "seat-lock",
+    "bef"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.30.3",
+  "peerDependencies": {
+    "@bef/core": "workspace:*"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.0"
+  },
+  "devDependencies": {
+    "@testcontainers/redis": "^10.0.0",
+    "testcontainers": "^10.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
