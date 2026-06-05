@@ -1,5 +1,5 @@
 {
-  "name": "@bef/core",
+  "name": "@sittichai/bef-core",
   "version": "0.1.0",
   "description": "Framework-agnostic transport booking engine — TripProvider, BookingService, SeatLockService, MockProvider",
   "type": "module",
