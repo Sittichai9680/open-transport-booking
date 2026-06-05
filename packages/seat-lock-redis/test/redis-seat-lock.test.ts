@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { RedisSeatLockService } from '../src/redis-seat-lock.js';
 import { Redis } from 'ioredis';
 
